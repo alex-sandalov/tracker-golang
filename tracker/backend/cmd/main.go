@@ -2,11 +2,10 @@ package main
 
 import (
 	"context"
-	"effective-mobile-golang/backend/internal/config"
-	httpserver "effective-mobile-golang/backend/internal/http-server"
-	"effective-mobile-golang/backend/internal/http-server/handler"
-	"effective-mobile-golang/backend/internal/service"
-	"fmt"
+	"tracker-app/backend/internal/config"
+	httpserver "tracker-app/backend/internal/http-server"
+	"tracker-app/backend/internal/http-server/handler"
+	"tracker-app/backend/internal/service"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -21,7 +20,6 @@ func main() {
 	service := service.NewService()
 	handler := handler.NewHandler(service)
 
-	fmt.Println(cfg.Server)
 	srv := new(httpserver.Server)
 	go func() {
 		if err := srv.Run(cfg.Server, handler.InitRoutes(&cfg.CORS, log)); err != nil {

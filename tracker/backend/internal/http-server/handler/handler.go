@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"effective-mobile-golang/backend/internal/config"
-	"effective-mobile-golang/backend/internal/http-server/middleware"
-	"effective-mobile-golang/backend/internal/service"
+	"tracker-app/backend/internal/config"
+	"tracker-app/backend/internal/http-server/middleware"
+	"tracker-app/backend/internal/service"
 	"log/slog"
 
 	"github.com/gin-contrib/cors"

@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"effective-mobile-golang/backend/internal/http-server/request"
-	"effective-mobile-golang/backend/internal/http-server/response"
-	"effective-mobile-golang/backend/internal/lib"
+	"tracker-app/backend/internal/http-server/request"
+	"tracker-app/backend/internal/http-server/response"
+	"tracker-app/backend/internal/lib"
 
 	"net/http"
 

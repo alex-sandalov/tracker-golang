@@ -1,7 +1,7 @@
 package request
 
 import (
-	"effective-mobile-golang/backend/internal/models"
+	"tracker-app/backend/internal/models"
 	"time"
 )
 

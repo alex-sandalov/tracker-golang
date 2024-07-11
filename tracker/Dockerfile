@@ -9,4 +9,6 @@ RUN apt-get update
 RUN go mod download
 RUN go build -o tracker-app ./backend/cmd/main.go
 
+EXPOSE 8080
+
 CMD ["./tracker-app"]

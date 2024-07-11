@@ -2,22 +2,31 @@ package main
 
 import (
 	"context"
-	"tracker-app/backend/internal/config"
-	httpserver "tracker-app/backend/internal/http-server"
-	"tracker-app/backend/internal/http-server/handler"
-	"tracker-app/backend/internal/service"
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+	"tracker-app/backend/internal/config"
+	httpserver "tracker-app/backend/internal/http-server"
+	"tracker-app/backend/internal/http-server/handler"
+	"tracker-app/backend/internal/repository"
+	"tracker-app/backend/internal/repository/postgres"
+	"tracker-app/backend/internal/service"
 )
 
 func main() {
 	cfg := config.MustLoad()
 
+	db, err := postgres.NewPostrgesDb(cfg.Database)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %s", err)
+	}
+
 	log := setupLogger()
 
-	service := service.NewService()
+	repos := repository.NewRepository(db)
+	service := service.NewService(log, repos)
 	handler := handler.NewHandler(service)
 
 	srv := new(httpserver.Server)
@@ -41,6 +50,7 @@ func main() {
 	log.Info("server exiting")
 }
 
+// setupLogger initializes and returns a new logger instance.
 func setupLogger() *slog.Logger {
 	var log *slog.Logger
 

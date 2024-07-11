@@ -9,3 +9,7 @@ stop:
 
 clean:
 	docker-compose down
+
+migrate:
+	chmod +x run-migrations.sh
+	./run-migrations.sh

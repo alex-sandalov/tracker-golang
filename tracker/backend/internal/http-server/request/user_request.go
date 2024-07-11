@@ -7,7 +7,7 @@ type AddUserRequest struct {
 }
 
 type DeleteUserRequest struct {
-	UserId int `json:"userId" binding:"required"`
+	UserId models.UserId `binding:"required"`
 }
 
 type UpdateUserRequest struct {

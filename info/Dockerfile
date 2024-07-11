@@ -5,11 +5,10 @@ WORKDIR /app
 COPY . .
 
 RUN apt-get update
-RUN apt-get -y install postgresql-client
 
 RUN go mod download
 RUN go build -o info-golang ./backend/cmd/main.go
 
-RUN chmod +x scripts/wait-for-postgres.sh
+EXPOSE 8081
 
 CMD ["./info-golang"]

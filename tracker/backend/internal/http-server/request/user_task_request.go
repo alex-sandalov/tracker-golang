@@ -17,3 +17,8 @@ type GetTasksByUserRequest struct {
 	EndTime   time.Time `json:"endTime" form:"endTime" binding:"required"`
 	Sort      string    `json:"sort" form:"sort" default:"desc"`
 }
+
+type StartTaskRequest struct {
+	UserId      int    `json:"userId" form:"userId" binding:"required"`
+	Description string `json:"description" form:"description"`
+}

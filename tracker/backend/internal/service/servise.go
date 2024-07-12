@@ -18,12 +18,18 @@ type UserInterface interface {
 	UpdateUser(user request.UpdateUserRequest) (response.UpdateUserResponse, error)
 }
 
+type UserTaskInterfase interface {
+	StartTask(task request.StartTaskRequest) (response.StartTaskResponse, error)
+}
+
 type Service struct {
 	UserInterface
+	UserTaskInterfase
 }
 
 func NewService(log *slog.Logger, repos *repository.Repository, db *sqlx.DB) *Service {
 	return &Service{
-		UserInterface: NewUserService(log, repos.UserInterface, db),
+		UserInterface:     NewUserService(log, repos.UserInterface, db),
+		UserTaskInterfase: NewUserTaskService(log, db, repos.UserInterface, repos.TaskInterfase),
 	}
 }

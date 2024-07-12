@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	tableUsers = "users"
+	tableUsers     = "users"
+	tableUserTasks = "user_tasks"
 )
 
 // NewPostrgesDb creates a new PostgreSQL database connection.

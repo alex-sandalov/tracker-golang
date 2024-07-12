@@ -10,6 +10,12 @@ type User struct {
 	Address        string `json:"address" form:"address"`
 }
 
+type UserDB struct {
+	UserId         int64 `db:"user_id"`
+	PassportNumber string `db:"passport_number"`
+	PasspoerSerie  string `db:"passport_serie"`
+}
+
 type UserId struct {
 	UserId int64 `json:"userId" form:"userId" db:"user_id"`
 }

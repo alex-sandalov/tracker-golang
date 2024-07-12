@@ -11,5 +11,6 @@ type DeleteUserRequest struct {
 }
 
 type UpdateUserRequest struct {
-	models.User
+	models.UserId `json:"userId"`
+	Update        map[string]string `json:"update"`
 }

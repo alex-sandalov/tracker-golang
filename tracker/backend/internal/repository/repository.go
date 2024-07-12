@@ -10,9 +10,10 @@ import (
 )
 
 type UserInterface interface {
-	AddUser(ctx context.Context, passportSeries, passportNumber string) (models.UserId, error)
-	DeleteUser(ctx context.Context, id models.UserId) error
-	UpdateUser(ctx context.Context, user request.UpdateUserRequest) error
+	AddUser(ctx context.Context, tx *sqlx.Tx, passportSeries, passportNumber string) (models.UserId, error)
+	DeleteUser(ctx context.Context, tx *sqlx.Tx, id models.UserId) error
+	UpdateUser(ctx context.Context, tx *sqlx.Tx, user request.UpdateUserRequest) error
+	GetInfoUser(ctx context.Context, tx *sqlx.Tx, id models.UserId) (models.UserDB, error)
 }
 
 type Repository struct {

@@ -26,7 +26,7 @@ func main() {
 	log := setupLogger()
 
 	repos := repository.NewRepository(db)
-	service := service.NewService(log, repos)
+	service := service.NewService(log, repos, db)
 	handler := handler.NewHandler(service)
 
 	srv := new(httpserver.Server)

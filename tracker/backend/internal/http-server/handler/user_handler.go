@@ -36,18 +36,20 @@ func (h *Handler) AddUser(c *gin.Context) {
 		return
 	}
 
+	ctx := context.Background()
+	user, err := h.service.GetInfoUser(ctx, passportSeries, passportNumber)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	userId, err := h.service.AddUser(passportSeries, passportNumber)
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	ctx := context.Background()
-	user, err := h.service.GetInfoUser(ctx, userId, passportSeries, passportNumber)
-	if err != nil {
-		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
-		return
-	}
+	user.UserId = userId
 
 	c.JSON(http.StatusOK, user)
 }
@@ -64,9 +66,7 @@ func (h *Handler) AddUser(c *gin.Context) {
 // Returns:
 //   - None.
 func (h *Handler) DeleteUser(c *gin.Context) {
-	idParam := c.Param("user_id")
-
-	id, err := strconv.ParseInt(idParam, 10, 64)
+	id, err := parseIdParam(c, "user_id")
 	if err != nil {
 		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -84,6 +84,53 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// UpdateUser handles the request to update a user.
+//
+// This function expects a JSON request body of type UpdateUserRequest,
+// which contains the updated user information.
+// The function updates the user with the given ID.
+//
+// Parameters:
+//   - c: The Gin context.
+//
+// Returns:
+//   - None.
 func (h *Handler) UpdateUser(c *gin.Context) {
+	id, err := parseIdParam(c, "user_id")
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
 
+	var req request.UpdateUserRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	req.UserId = models.UserId{UserId: id}
+
+	infoUser, err := h.service.UpdateUser(req)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, infoUser)
+}
+
+// parseIdParam parses an integer id from the request parameter.
+//
+// Parameters:
+//   - c: The Gin context.
+//   - nameId: The name of the id parameter in the URL.
+//
+// Returns:
+//   - id: The parsed integer id.
+//   - err: An error if the parsing fails.
+func parseIdParam(c *gin.Context, nameId string) (int64, error) {
+	idParam := c.Param(nameId)
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	return id, err
 }

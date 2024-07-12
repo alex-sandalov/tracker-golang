@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"log/slog"
 	"tracker-app/backend/internal/config"
 	"tracker-app/backend/internal/http-server/middleware"
 	"tracker-app/backend/internal/service"
-	"log/slog"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

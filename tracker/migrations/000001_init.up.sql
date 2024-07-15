@@ -10,5 +10,6 @@ CREATE TABLE user_tasks(
         description VARCHAR(255) NOT NULL,
         start_time TIMESTAMP NOT NULL,
         end_time TIMESTAMP,
+        active BOOLEAN NOT NULL,
         FOREIGN KEY (user_id) REFERENCES users(user_id)
 );

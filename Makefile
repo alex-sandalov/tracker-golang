@@ -38,6 +38,10 @@ clean:
 	cd tracker && make clean
 	cd info && make clean
 
+migrate:
+	cd tracker && make migrate
+	cd info && make migrate
+
 network-up:
 	docker network create app-net
 	@echo "Сеть создана"
@@ -45,4 +49,3 @@ network-up:
 network-delete:
 	docker network rm app-net
 	@echo "Сеть удалена"
-

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"tracker-app/backend/internal/http-server/request"
+	"tracker-app/backend/internal/lib"
 	"tracker-app/backend/internal/models"
 
 	"github.com/jmoiron/sqlx"
@@ -82,15 +83,7 @@ func (r *UserPostgres) DeleteUser(ctx context.Context, tx *sqlx.Tx, id models.Us
 // Returns:
 // - error: An error if the query fails.
 func (r *UserPostgres) UpdateUser(ctx context.Context, tx *sqlx.Tx, user request.UpdateUserRequest) error {
-	var setStatements []string
-	var args []interface{}
-
-	idx := 1
-	for field, value := range user.Update {
-		setStatements = append(setStatements, fmt.Sprintf("%s = $%d", field, idx))
-		args = append(args, value)
-		idx++
-	}
+	setStatements, args, idx := lib.GetQueryManyFields(user.Update)
 
 	query := fmt.Sprintf(
 		"UPDATE %s SET %s WHERE user_id = $%d",
@@ -125,4 +118,56 @@ func (r *UserPostgres) GetInfoUser(ctx context.Context, tx *sqlx.Tx, id models.U
 	err := tx.GetContext(ctx, &user, query, id.UserId)
 
 	return user, err
+}
+
+// GetUsers retrieves users from the PostgreSQL database based on the provided statement set and arguments.
+// It takes a context.Context, a transaction object, a statement set, and arguments as parameters.
+// It returns a slice of User objects and an error.
+//
+// Parameters:
+// - ctx: The context.Context object for the function.
+// - tx: A transaction object for the database operations.
+// - statamentSet: A slice of strings representing the SQL statements to be joined with "AND".
+// - args: A slice of interface{} representing the arguments for the SQL statements.
+//
+// Returns:
+// - []models.User: The slice of User objects retrieved from the database.
+// - error: An error if the query fails.
+func (r *UserPostgres) GetUsers(ctx context.Context, tx *sqlx.Tx, statamentSet []string, args []interface{}, limit, offset int) ([]models.User, error) {
+	var users []models.User
+
+	query := fmt.Sprintf("SELECT user_id, passport_number, passport_serie FROM %s WHERE %s",
+		tableUsers, strings.Join(statamentSet, " AND "))
+
+	if limit > 0 {
+		query += fmt.Sprintf(" LIMIT %d", limit)
+	}
+	if offset > 0 {
+		query += fmt.Sprintf(" OFFSET %d", offset)
+	}
+
+	err := tx.SelectContext(ctx, &users, query, args...)
+	return users, err
+}
+
+// GetCountUsersFilters retrieves the count of users from the PostgreSQL database based on the provided statement set and arguments.
+// It takes a context.Context, a transaction object, a statement set, and arguments as parameters.
+// It returns the count of users and an error.
+//
+// Parameters:
+// - ctx: The context.Context object for the function.
+// - tx: A transaction object for the database operations.
+// - statementSet: A slice of strings representing the SQL statements to be joined with "AND".
+// - args: A slice of interface{} representing the arguments for the SQL statements.
+//
+// Returns:
+// - int: The count of users retrieved from the database.
+// - error: An error if the query fails.
+func (r *UserPostgres) GetCountUsersFilters(ctx context.Context, tx *sqlx.Tx, statementSet []string, args []interface{}) (int, error) {
+	var count int
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE %s",
+		tableUsers, strings.Join(statementSet, " AND "))
+
+	err := tx.GetContext(ctx, &count, query, args...)
+	return count, err
 }

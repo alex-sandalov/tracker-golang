@@ -14,12 +14,15 @@ import (
 type UserInterface interface {
 	GetInfoUser(ctx context.Context, passportSeries, passportNumber string) (models.User, error)
 	AddUser(passportSeries, passportNumber string) (models.UserId, error)
+	GetUsers(req request.GetUsersRequest) (response.GetUsersResponse, error)
 	DeleteUser(id request.DeleteUserRequest) error
 	UpdateUser(user request.UpdateUserRequest) (response.UpdateUserResponse, error)
 }
 
 type UserTaskInterfase interface {
 	StartTask(task request.StartTaskRequest) (response.StartTaskResponse, error)
+	StopTask(task request.StopTaskRequest) (response.StopTaskResponse, error)
+	GetTasksByUser(req request.GetTasksByUserRequest) (response.GetTasksByUserResponse, error)
 }
 
 type Service struct {

@@ -13,6 +13,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func (h *Handler) GetUsers(c *gin.Context) {
+	var req request.GetUsersRequest
+
+	if err := c.ShouldBindQuery(&req); err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.service.GetUsers(req)
+	if err != nil {
+		response.NewErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
 // AddUser handles the request to add a new user.
 // It expects a JSON request body of type AddUserRequest.
 // The function parses the passport number from the request and returns the parsed values.

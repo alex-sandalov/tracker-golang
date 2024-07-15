@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/url"
+	"strconv"
 	"tracker-app/backend/internal/http-server/request"
 	"tracker-app/backend/internal/http-server/response"
 	"tracker-app/backend/internal/lib"
@@ -42,7 +43,7 @@ func (s *UserService) GetInfoUser(ctx context.Context, passportSeries, passportN
 	var user models.User
 
 	user.PassportNumber = passportNumber
-	user.PasspoerSeries = passportSeries
+	user.PassportSeries = passportSeries
 
 	params := url.Values{}
 	params.Add("passportSerie", passportSeries)
@@ -170,4 +171,77 @@ func (s *UserService) UpdateUser(user request.UpdateUserRequest) (response.Updat
 	return response.UpdateUserResponse{
 		UserDB: userInfo,
 	}, nil
+}
+
+// GetUsers retrieves users from the database based on the provided request parameters.
+// If passport series and/or passport number are provided, only users matching those criteria are returned.
+//
+// Parameters:
+// - req: A request.GetUsersRequest object containing the parameters for the query.
+//
+// Returns:
+// - A response.GetUsersResponse object containing the retrieved users.
+// - An error if the query fails at any step.
+func (s *UserService) GetUsers(req request.GetUsersRequest) (response.GetUsersResponse, error) {
+	ctx := context.Background()
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		s.log.Error("failed to begin transaction: %s", err)
+		return response.GetUsersResponse{}, err
+	}
+
+	var setStatements []string
+	var args []interface{}
+
+	idx := 1
+	if req.PassportSeries != "" {
+		setStatements = append(setStatements, "passport_serie = $1")
+		args = append(args, req.PassportSeries)
+		idx++
+	}
+
+	if req.PassportNumber != "" {
+		setStatements = append(setStatements, "passport_number = $"+strconv.Itoa(idx))
+		args = append(args, req.PassportNumber)
+	}
+
+	if len(setStatements) == 0 {
+		setStatements = append(setStatements, "TRUE")
+	}
+
+	offset := (req.PerPage - 1) * req.Page
+	users, err := s.repos.GetUsers(ctx, tx, setStatements, args, req.Page, offset)
+	if err != nil {
+		s.log.Error("failed to get users: %s", err)
+		tx.Rollback()
+		return response.GetUsersResponse{}, err
+	}
+
+	countUsersAll, err := s.repos.GetCountUsersFilters(ctx, tx, setStatements, args)
+	if err != nil {
+		s.log.Error("failed to get count users: %s", err)
+		tx.Rollback()
+		return response.GetUsersResponse{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		s.log.Error("failed to commit transaction: %s", err)
+		return response.GetUsersResponse{}, err
+	}
+
+	var usersResponse response.GetUsersResponse
+
+	usersResponse.CountUsersPage = len(users)
+	usersResponse.CountUsersAll = countUsersAll
+
+	for _, user := range users {
+		usersResponse.Users = append(usersResponse.Users, response.GetUserResponse{
+			UserId:         user.UserId,
+			PassportSerie:  user.PassportSeries,
+			PassportNumber: user.PassportNumber,
+		})
+	}
+
+	return usersResponse, nil
 }

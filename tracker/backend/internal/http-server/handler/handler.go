@@ -85,13 +85,13 @@ func (h *Handler) initUsersAPI(users *gin.RouterGroup) {
 	users.GET("/", h.GetUsers)
 
 	// GET /api/external/users/:id/tasks/time: Retrieves labour costs by user ID.
-	users.GET("/:id/tasks/time", h.GetTasksByUser)
+	users.GET("/:user_id/tasks/time", h.GetTasksByUser)
 
 	// POST /api/external/users/:user_id/tasks/start: Starts a task for a user.
 	users.POST("/tasks/start", h.StartTaskByUser)
 
 	// POST /api/external/users/:user_id/tasks/:task_id/stop: Stops a task for a user.
-	users.POST("/:user_id/tasks/:task_id/stop", h.StopTaskByUser)
+	users.POST("/tasks/stop", h.StopTaskByUser)
 
 	// POST /api/external/users/: Adds a new user.
 	users.POST("/", h.AddUser)

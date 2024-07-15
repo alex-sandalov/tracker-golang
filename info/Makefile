@@ -19,5 +19,5 @@ stop:
 	docker-compose stop info-golang
 
 migrate:
-	chmod +x ./rum-migrations.sh
-	./rum-migrations.sh
+	chmod +x ./run-migrations.sh
+	./run-migrations.sh

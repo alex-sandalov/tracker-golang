@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 	"tracker-app/backend/internal/models"
 
 	"github.com/jmoiron/sqlx"
@@ -32,11 +34,11 @@ func (u *UserTaskRepository) StartTask(ctx context.Context, tx *sqlx.Tx, task mo
 	var idTask int64
 
 	query := fmt.Sprintf(
-		"INSERT INTO %s (user_id, description, start_time) VALUES ($1, $2, NOW()) RETURNING task_id",
+		"INSERT INTO %s (user_id, description, active, start_time, end_time) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING task_id",
 		tableUserTasks,
 	)
 
-	err := tx.QueryRowxContext(ctx, query, task.UserId.UserId, task.Description).Scan(&idTask)
+	err := tx.QueryRowxContext(ctx, query, task.UserId.UserId, task.Description, true).Scan(&idTask)
 
 	return idTask, err
 }
@@ -52,4 +54,57 @@ func (u *UserTaskRepository) GetCountTasks(ctx context.Context, tx *sqlx.Tx, use
 	query := fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE user_id = $1", tableUserTasks)
 	err := tx.QueryRowxContext(ctx, query, userId.UserId).Scan(&count)
 	return count, err
+}
+
+// StopTask stops a task in the PostgreSQL database by updating the 'active' field to false.
+//
+// Parameters:
+//   - ctx: The context.Context object for the function.
+//   - tx: A transaction object for the database operations.
+//   - taskId: The ID of the task to be stopped.
+//
+// Returns:
+//   - The end time of the stopped task and an error if the query fails.
+func (u *UserTaskRepository) StopTask(ctx context.Context, tx *sqlx.Tx, taskId int64) (time.Time, error) {
+	query := fmt.Sprintf("UPDATE %s SET active = $1, end_time = NOW() WHERE task_id = $2 RETURNING end_time", tableUserTasks)
+
+	endTime := time.Now()
+	err := tx.QueryRowxContext(ctx, query, false, taskId).Scan(&endTime)
+
+	return endTime, err
+}
+
+// GetTaskById retrieves a task from the PostgreSQL database based on the task ID.
+//
+// ctx: The context.Context object for the function.
+// tx: A transaction object for the database operations.
+// id: The ID of the task to retrieve.
+// Returns: The Task object and an error if the query fails.
+func (u *UserTaskRepository) GetTaskById(ctx context.Context, tx *sqlx.Tx, id int64) (models.Task, error) {
+	var taskInfo models.Task
+	query := fmt.Sprintf("SELECT * FROM %s WHERE task_id = $1", tableUserTasks)
+	err := tx.GetContext(ctx, &taskInfo, query, id)
+	return taskInfo, err
+}
+
+// GetTaskByUser retrieves tasks based on the specified conditions for a user.
+// It takes a context.Context, a transaction object, the type of sorting, a slice of statements, and a slice of arguments as parameters.
+// It returns a slice of Task objects and an error.
+//
+// ctx: The context.Context object for the function.
+// tx: A transaction object for the database operations.
+// typeSort: The type of sorting to apply to the tasks.
+// statementSet: A slice of strings representing conditions to filter the tasks.
+// args: A slice of interface{} containing the arguments for the query.
+// Returns: A slice of Task objects and an error.
+func (u *UserTaskRepository) GetTaskByUser(ctx context.Context, tx *sqlx.Tx, typeSort string, statementSet []string, args []interface{}) ([]models.Task, error) {
+	var tasks []models.Task
+	query := fmt.Sprintf(`
+		SELECT task_id, user_id, description, active, start_time, end_time,
+			end_time - start_time AS duration
+		FROM %s
+		WHERE %s
+		ORDER BY duration %s`, tableUserTasks, strings.Join(statementSet, " AND "), typeSort)
+	err := tx.SelectContext(ctx, &tasks, query, args...)
+	return tasks, err
 }

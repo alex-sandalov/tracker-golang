@@ -38,6 +38,7 @@ func (s *UserTaskService) StartTask(taskInfo request.StartTaskRequest) (response
 
 	tx, err := s.db.BeginTxx(ctx, nil)
 	if err != nil {
+		s.log.Error("failed to begin transaction: %s", err)
 		return response.StartTaskResponse{}, err
 	}
 
@@ -83,4 +84,95 @@ func (s *UserTaskService) StartTask(taskInfo request.StartTaskRequest) (response
 	}
 
 	return response, nil
+}
+
+// StopTask stops a task.
+// It takes a StopTaskRequest as input and returns a StopTaskResponse and an error.
+//
+// taskInfo: The StopTaskRequest containing the task information.
+// Returns: The StopTaskResponse and an error.
+func (s *UserTaskService) StopTask(taskInfo request.StopTaskRequest) (response.StopTaskResponse, error) {
+	ctx := context.Background()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		s.log.Error("failed to begin transaction: %s", err)
+		return response.StopTaskResponse{}, err
+	}
+
+	task, err := s.reposTask.GetTaskById(ctx, tx, int64(taskInfo.TaskId))
+	if err != nil {
+		s.log.Error("failed to get task info: %s", err)
+		tx.Rollback()
+		return response.StopTaskResponse{}, err
+	}
+
+	if !task.Active {
+		s.log.Error("task is not active")
+		tx.Rollback()
+		return response.StopTaskResponse{}, fmt.Errorf("task is not active")
+	}
+
+	endTime, err := s.reposTask.StopTask(ctx, tx, int64(taskInfo.TaskId))
+	if err != nil {
+		s.log.Error("failed to stop task: %s", err)
+		tx.Rollback()
+		return response.StopTaskResponse{}, err
+	}
+
+	countTask, err := s.reposTask.GetCountTasks(ctx, tx, task.UserId)
+	if err != nil {
+		s.log.Error("failed to get count tasks: %s", err)
+		tx.Rollback()
+		return response.StopTaskResponse{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		s.log.Error("failed to commit transaction: %s", err)
+		tx.Rollback()
+		return response.StopTaskResponse{}, err
+	}
+
+	task.TimeStop = endTime
+	response := response.StopTaskResponse{
+		CountTasks: countTask,
+		Task:       task,
+	}
+
+	return response, nil
+}
+
+func (s *UserTaskService) GetTasksByUser(req request.GetTasksByUserRequest) (response.GetTasksByUserResponse, error) {
+	ctx := context.Background()
+
+	tx, err := s.db.BeginTxx(ctx, nil)
+	if err != nil {
+		s.log.Error("failed to begin transaction: %s", err)
+		return response.GetTasksByUserResponse{}, err
+	}
+
+	statementSet := []string{"start_time > $1", "end_time < $2"}
+	args := []interface{}{req.StartTime, req.EndTime}
+
+	task, err := s.reposTask.GetTaskByUser(ctx, tx, req.Sort, statementSet, args)
+	if err != nil {
+		s.log.Error("failed to get task: %s", err)
+		tx.Rollback()
+		return response.GetTasksByUserResponse{}, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		s.log.Error("error commit tx: %s", err)
+		tx.Rollback()
+		return response.GetTasksByUserResponse{}, err
+	}
+
+	responseTask := response.GetTasksByUserResponse{
+		CountTasks: len(task),
+		Tasks:      task,
+	}
+
+	return responseTask, nil
 }

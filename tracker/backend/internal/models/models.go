@@ -4,8 +4,8 @@ import "time"
 
 type User struct {
 	UserId
-	PassportNumber string `json:"passportNumber" form:"passportNumber"`
-	PasspoerSeries string `json:"passportSeries" form:"passportSeries"`
+	PassportNumber string `json:"passportNumber" form:"passportNumber" db:"passport_number"`
+	PassportSeries string `json:"passportSeries" form:"passportSerie" db:"passport_serie"`
 	Surname        string `json:"surname" form:"surname"`
 	Name           string `json:"name" form:"name"`
 	Patronymic     string `json:"patronymic" form:"patronymic"`
@@ -25,6 +25,9 @@ type UserId struct {
 type Task struct {
 	UserId
 	TaskId      int64     `json:"taskId" form:"taskId" db:"task_id"`
-	Description string    `json:"description" form:"description"`
-	TimeStart   time.Time `json:"timeStart" form:"timeStart"`
+	Description string    `json:"description" form:"description" db:"description"`
+	TimeStart   time.Time `json:"timeStart" form:"timeStart" db:"start_time"`
+	TimeStop    time.Time `json:"timeStop" form:"timeStop" db:"end_time"`
+	Active      bool      `json:"active" form:"active" db:"active"`
+	Duration    []uint8   `db:"duration"`
 }

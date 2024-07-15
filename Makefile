@@ -9,6 +9,8 @@ help:
 	@echo "create_dbs     - создать базы данных"
 	@echo "network-up     - создать сеть"
 	@echo "network-delete - удалить сеть"
+	@echo "clean          - удалить контейнеры"
+	@echo "migrate        - мигрировать базы данных"
 
 up:
 	docker-compose up --build -d tracker-db

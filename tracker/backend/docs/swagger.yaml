@@ -1,0 +1,361 @@
+basePath: /api/external
+definitions:
+  models.Task:
+    properties:
+      active:
+        type: boolean
+      description:
+        type: string
+      duration:
+        items:
+          type: integer
+        type: array
+      taskId:
+        type: integer
+      timeStart:
+        type: string
+      timeStop:
+        type: string
+      userId:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      passportNumber:
+        type: string
+      passportSeries:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+      userId:
+        type: integer
+    type: object
+  models.UserId:
+    properties:
+      userId:
+        type: integer
+    type: object
+  request.AddUserRequest:
+    properties:
+      passportNumber:
+        type: string
+    required:
+    - passportNumber
+    type: object
+  request.StartTaskRequest:
+    properties:
+      description:
+        type: string
+      userId:
+        type: integer
+    required:
+    - userId
+    type: object
+  request.StopTaskRequest:
+    properties:
+      taskId:
+        type: integer
+      userId:
+        type: integer
+    required:
+    - taskId
+    - userId
+    type: object
+  request.UpdateUserRequest:
+    properties:
+      update:
+        additionalProperties:
+          type: string
+        type: object
+      userId:
+        $ref: '#/definitions/models.UserId'
+    type: object
+  response.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.GetTasksByUserResponse:
+    properties:
+      countTasks:
+        type: integer
+      tasks:
+        items:
+          $ref: '#/definitions/models.Task'
+        type: array
+    type: object
+  response.GetUserResponse:
+    properties:
+      passportNumber:
+        type: string
+      passportSerie:
+        type: string
+      userId:
+        type: integer
+    type: object
+  response.GetUsersResponse:
+    properties:
+      counUsersAll:
+        type: integer
+      countUsersPage:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/response.GetUserResponse'
+        type: array
+    type: object
+  response.StartTaskResponse:
+    properties:
+      countTasks:
+        type: integer
+      description:
+        type: string
+      taskId:
+        type: integer
+      userId:
+        type: integer
+    type: object
+  response.StopTaskResponse:
+    properties:
+      active:
+        type: boolean
+      countTasks:
+        type: integer
+      description:
+        type: string
+      duration:
+        items:
+          type: integer
+        type: array
+      taskId:
+        type: integer
+      timeStart:
+        type: string
+      timeStop:
+        type: string
+      userId:
+        type: integer
+    type: object
+  response.UpdateUserResponse:
+    properties:
+      passpoerSerie:
+        type: string
+      passportNumber:
+        type: string
+      userId:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Tracker API
+  title: Tracker API
+  version: "1.0"
+paths:
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get users
+      parameters:
+      - in: query
+        minimum: 1
+        name: page
+        type: integer
+      - in: query
+        name: passportNumber
+        type: string
+      - in: query
+        name: passportSerie
+        type: string
+      - in: query
+        minimum: 1
+        name: perPage
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetUsersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get users
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Add user
+      parameters:
+      - description: Add user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.AddUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Add user
+      tags:
+      - users
+  /users/{user_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Update user request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UpdateUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Update user
+      tags:
+      - users
+  /users/{user_id}/tasks:
+    get:
+      consumes:
+      - application/json
+      description: Get tasks by user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - in: query
+        name: endTime
+        required: true
+        type: string
+      - default: desc
+        in: query
+        name: sort
+        type: string
+      - in: query
+        name: startTime
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetTasksByUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get tasks by user
+      tags:
+      - tasks
+  /users/tasks:
+    post:
+      consumes:
+      - application/json
+      description: Start task by user
+      parameters:
+      - description: Start task request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StartTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StartTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Start task by user
+      tags:
+      - tasks
+    put:
+      consumes:
+      - application/json
+      description: Stop task by user
+      parameters:
+      - description: Stop task request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.StopTaskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StopTaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Stop task by user
+      tags:
+      - tasks
+swagger: "2.0"

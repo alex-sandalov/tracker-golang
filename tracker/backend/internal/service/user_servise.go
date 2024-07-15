@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/url"
 	"strconv"
@@ -54,7 +55,7 @@ func (s *UserService) GetInfoUser(ctx context.Context, passportSeries, passportN
 	infoUser, err := lib.GET(ctx, url)
 	if err != nil {
 		s.log.Error("failed to get user info: %s", err)
-		return user, err
+		return user, fmt.Errorf("данного пользователя нет в базе данных")
 	}
 
 	user.Surname = infoUser.Surname

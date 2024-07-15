@@ -15,6 +15,12 @@ import (
 	"tracker-app/backend/internal/service"
 )
 
+// @title Tracker API
+// @version 1.0
+// @description Tracker API
+
+// @host localhost:8080
+// @BasePath /api/external
 func main() {
 	cfg := config.MustLoad()
 

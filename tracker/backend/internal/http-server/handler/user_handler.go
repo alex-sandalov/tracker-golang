@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"strconv"
+	_ "tracker-app/backend/docs"
 	"tracker-app/backend/internal/http-server/request"
 	"tracker-app/backend/internal/http-server/response"
 	"tracker-app/backend/internal/lib"
@@ -13,6 +14,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// @Summary Get users
+// @Description Get users
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request query request.GetUsersRequest true "Get users request"
+// @Success 200 {object} response.GetUsersResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Router /users [get]
 func (h *Handler) GetUsers(c *gin.Context) {
 	var req request.GetUsersRequest
 
@@ -30,15 +40,15 @@ func (h *Handler) GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// AddUser handles the request to add a new user.
-// It expects a JSON request body of type AddUserRequest.
-// The function parses the passport number from the request and returns the parsed values.
-//
-// Parameters:
-//   - c: The Gin context.
-//
-// Returns:
-//   - None.
+// @Summary Add user
+// @Description Add user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param request body request.AddUserRequest true "Add user request"
+// @Success 200 {object} models.User
+// @Failure 400 {object} response.ErrorResponse
+// @Router /users [post]
 func (h *Handler) AddUser(c *gin.Context) {
 	var req request.AddUserRequest
 
@@ -71,17 +81,15 @@ func (h *Handler) AddUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// DeleteUser handles the request to delete a user.
-//
-// This function expects a JSON request body of type DeleteUserRequest,
-// which contains the ID of the user to be deleted.
-// The function deletes the user with the given ID.
-//
-// Parameters:
-//   - c: The Gin context.
-//
-// Returns:
-//   - None.
+// @Summary Delete user
+// @Description Delete user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user_id path int true "User ID"
+// @Success 200
+// @Failure 400 {object} response.ErrorResponse
+// @Router /users/{user_id} [delete]
 func (h *Handler) DeleteUser(c *gin.Context) {
 	id, err := parseIdParam(c, "user_id")
 	if err != nil {
@@ -101,17 +109,16 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-// UpdateUser handles the request to update a user.
-//
-// This function expects a JSON request body of type UpdateUserRequest,
-// which contains the updated user information.
-// The function updates the user with the given ID.
-//
-// Parameters:
-//   - c: The Gin context.
-//
-// Returns:
-//   - None.
+// @Summary Update user
+// @Description Update user
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param user_id path int true "User ID"
+// @Param request body request.UpdateUserRequest true "Update user request"
+// @Success 200 {object} response.UpdateUserResponse
+// @Failure 400 {object} response.ErrorResponse
+// @Router /users/{user_id} [put]
 func (h *Handler) UpdateUser(c *gin.Context) {
 	id, err := parseIdParam(c, "user_id")
 	if err != nil {
@@ -137,15 +144,6 @@ func (h *Handler) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, infoUser)
 }
 
-// parseIdParam parses an integer id from the request parameter.
-//
-// Parameters:
-//   - c: The Gin context.
-//   - nameId: The name of the id parameter in the URL.
-//
-// Returns:
-//   - id: The parsed integer id.
-//   - err: An error if the parsing fails.
 func parseIdParam(c *gin.Context, nameId string) (int64, error) {
 	idParam := c.Param(nameId)
 	id, err := strconv.ParseInt(idParam, 10, 64)

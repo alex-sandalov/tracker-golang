@@ -8,6 +8,11 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	_ "tracker-app/backend/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Handler struct {
@@ -45,6 +50,8 @@ func (h *Handler) InitRoutes(cfg *config.CORS, log *slog.Logger) *gin.Engine {
 			h.initUsersAPI(users)
 		}
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler()))
 
 	return router
 }

@@ -7,9 +7,10 @@ type AddUserRequest struct {
 }
 
 type GetUsersRequest struct {
-	models.User
-	Page    int `json:"page" form:"page" binding:"min=1"`
-	PerPage int `json:"perPage" form:"perPage" binding:"min=1"`
+	PassportNumber string `json:"passportNumber" form:"passportNumber"`
+	PassportSeries string `json:"passportSerie" form:"passportSerie"`
+	Page           int    `json:"page" form:"page" binding:"min=1"`
+	PerPage        int    `json:"perPage" form:"perPage" binding:"min=1"`
 }
 
 type DeleteUserRequest struct {

@@ -118,7 +118,7 @@ func (h *Handler) DeleteUser(c *gin.Context) {
 // @Param request body request.UpdateUserRequest true "Update user request"
 // @Success 200 {object} response.UpdateUserResponse
 // @Failure 400 {object} response.ErrorResponse
-// @Router /users/{user_id} [put]
+// @Router /users/{user_id} [patch]
 func (h *Handler) UpdateUser(c *gin.Context) {
 	id, err := parseIdParam(c, "user_id")
 	if err != nil {

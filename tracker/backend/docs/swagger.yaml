@@ -240,7 +240,7 @@ paths:
       summary: Delete user
       tags:
       - users
-    put:
+    patch:
       consumes:
       - application/json
       description: Update user

@@ -2,7 +2,7 @@ package httpserver
 
 import (
 	"context"
-	"effective-mobile-golang/backend/internal/config"
+	"tracker-app/backend/internal/config"
 	"net/http"
 )
 

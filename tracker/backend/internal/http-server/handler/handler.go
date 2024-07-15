@@ -1,13 +1,18 @@
 package handler
 
 import (
-	"effective-mobile-golang/backend/internal/config"
-	"effective-mobile-golang/backend/internal/http-server/middleware"
-	"effective-mobile-golang/backend/internal/service"
 	"log/slog"
+	"tracker-app/backend/internal/config"
+	"tracker-app/backend/internal/http-server/middleware"
+	"tracker-app/backend/internal/service"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+
+	_ "tracker-app/backend/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Handler struct {
@@ -45,6 +50,8 @@ func (h *Handler) InitRoutes(cfg *config.CORS, log *slog.Logger) *gin.Engine {
 			h.initUsersAPI(users)
 		}
 	}
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.NewHandler()))
 
 	return router
 }
@@ -85,13 +92,13 @@ func (h *Handler) initUsersAPI(users *gin.RouterGroup) {
 	users.GET("/", h.GetUsers)
 
 	// GET /api/external/users/:id/tasks/time: Retrieves labour costs by user ID.
-	users.GET("/:id/tasks/time", h.GetTasksByUser)
+	users.GET("/:user_id/tasks/time", h.GetTasksByUser)
 
-	// POST /api/external/users/:user_id/tasks/:task_id/start: Starts a task for a user.
-	users.POST("/:user_id/tasks/:task_id/start", h.StartTaskByUser)
+	// POST /api/external/users/:user_id/tasks/start: Starts a task for a user.
+	users.POST("/tasks/start", h.StartTaskByUser)
 
 	// POST /api/external/users/:user_id/tasks/:task_id/stop: Stops a task for a user.
-	users.POST("/:user_id/tasks/:task_id/stop", h.StopTaskByUser)
+	users.POST("/tasks/stop", h.StopTaskByUser)
 
 	// POST /api/external/users/: Adds a new user.
 	users.POST("/", h.AddUser)

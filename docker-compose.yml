@@ -1,0 +1,15 @@
+services:
+  tracker-db:
+    restart: always
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+    ports:
+      - 5432:5432
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    external: true

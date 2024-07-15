@@ -1,15 +1,23 @@
 package request
 
-import "effective-mobile-golang/backend/internal/models"
+import "tracker-app/backend/internal/models"
 
 type AddUserRequest struct {
 	PassportNumber string `json:"passportNumber" binding:"required"`
 }
 
+type GetUsersRequest struct {
+	PassportNumber string `json:"passportNumber" form:"passportNumber"`
+	PassportSeries string `json:"passportSerie" form:"passportSerie"`
+	Page           int    `json:"page" form:"page" binding:"min=1"`
+	PerPage        int    `json:"perPage" form:"perPage" binding:"min=1"`
+}
+
 type DeleteUserRequest struct {
-	UserId int `json:"userId" binding:"required"`
+	UserId models.UserId `binding:"required"`
 }
 
 type UpdateUserRequest struct {
-	models.User
+	models.UserId `json:"userId"`
+	Update        map[string]string `json:"update"`
 }

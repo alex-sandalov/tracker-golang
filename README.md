@@ -18,7 +18,7 @@
 make build && make run
 ```
 
-## Если приложение запускает впервые
+## Цели Makefile
 ```sh
-make migrate
+make help
 ```

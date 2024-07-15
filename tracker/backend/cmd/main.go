@@ -2,26 +2,39 @@ package main
 
 import (
 	"context"
-	"effective-mobile-golang/backend/internal/config"
-	httpserver "effective-mobile-golang/backend/internal/http-server"
-	"effective-mobile-golang/backend/internal/http-server/handler"
-	"effective-mobile-golang/backend/internal/service"
-	"fmt"
+	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
+	"tracker-app/backend/internal/config"
+	httpserver "tracker-app/backend/internal/http-server"
+	"tracker-app/backend/internal/http-server/handler"
+	"tracker-app/backend/internal/repository"
+	"tracker-app/backend/internal/repository/postgres"
+	"tracker-app/backend/internal/service"
 )
 
+// @title Tracker API
+// @version 1.0
+// @description Tracker API
+
+// @host localhost:8080
+// @BasePath /api/external
 func main() {
 	cfg := config.MustLoad()
 
+	db, err := postgres.NewPostrgesDb(cfg.Database)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %s", err)
+	}
+
 	log := setupLogger()
 
-	service := service.NewService()
+	repos := repository.NewRepository(db)
+	service := service.NewService(log, repos, db)
 	handler := handler.NewHandler(service)
 
-	fmt.Println(cfg.Server)
 	srv := new(httpserver.Server)
 	go func() {
 		if err := srv.Run(cfg.Server, handler.InitRoutes(&cfg.CORS, log)); err != nil {
@@ -43,6 +56,7 @@ func main() {
 	log.Info("server exiting")
 }
 
+// setupLogger initializes and returns a new logger instance.
 func setupLogger() *slog.Logger {
 	var log *slog.Logger
 

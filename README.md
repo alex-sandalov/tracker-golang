@@ -19,9 +19,9 @@ make build && make run
 ```
 
 ## Запуск первый раз
-``sh
+```sh
 make build && make run && make migrate
-``
+```
 
 ## Цели Makefile
 ```sh

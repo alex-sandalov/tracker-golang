@@ -307,7 +307,7 @@ paths:
       summary: Get tasks by user
       tags:
       - tasks
-  /users/tasks:
+  /users/tasks/start:
     post:
       consumes:
       - application/json
@@ -333,7 +333,8 @@ paths:
       summary: Start task by user
       tags:
       - tasks
-    put:
+  /users/tasks/stop:
+    post:
       consumes:
       - application/json
       description: Stop task by user

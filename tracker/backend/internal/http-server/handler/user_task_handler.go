@@ -52,7 +52,7 @@ func (h *Handler) GetTasksByUser(c *gin.Context) {
 // @Param request body request.StartTaskRequest true "Start task request"
 // @Success 200 {object} response.StartTaskResponse
 // @Failure 400 {object} response.ErrorResponse
-// @Router /users/tasks [post]
+// @Router /users/tasks/start [post]
 func (h *Handler) StartTaskByUser(c *gin.Context) {
 	var req request.StartTaskRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -77,7 +77,7 @@ func (h *Handler) StartTaskByUser(c *gin.Context) {
 // @Param request body request.StopTaskRequest true "Stop task request"
 // @Success 200 {object} response.StopTaskResponse
 // @Failure 400 {object} response.ErrorResponse
-// @Router /users/tasks [put]
+// @Router /users/tasks/stop [post]
 func (h *Handler) StopTaskByUser(c *gin.Context) {
 	var req request.StopTaskRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
